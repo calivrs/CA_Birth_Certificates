@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="height: 100%">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style>
@@ -27,7 +27,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>California Electronic Birth Registration System</title>
   </head>
-  <body>
+  <body style="height: 100%">
     <div ng-app="birth" class="ng-scope">
       <!-- uiView: --><ui-view class="ng-scope"
         ><br-root
@@ -705,12 +705,656 @@
               margin-bottom: 2em;
             }
           </style>
+          <!-- hide all other work behind a "curtain" when floating "modal" error messages are displayed -->
+          <div
+            id="modal_overlay"
+            ng-show="$root.rt_ctl.are_tran_msgs()"
+            tabindex="-10"
+            class="ng-hide"
+          ></div>
           <!-- ngIf: $root.rt_ctl.is_floater() -->
           <div
             id="floating_hdr"
             ng-if="$root.rt_ctl.is_floater()"
             class="ng-scope"
-          ></div>
+          >
+            <div>
+              <!-- ngIf: $root.rt_mod.settings.floating.menu -->
+              <div
+                id="top-menu"
+                class="s-shaded s-menu ng-scope ng-isolate-scope"
+                style="display: flex; display -webkit-flex;"
+                ng-if="$root.rt_mod.settings.floating.menu"
+                menu="$root.rt_mod.menu"
+                handler="$root.rt_ctl.handle_menu_selection( action, name, url )"
+                local-settings="$root.rt_ctl.local_settings()"
+              >
+                <!-- ngRepeat: top_menu in menu --><span
+                  ng-repeat="top_menu in menu"
+                  class="ng-scope"
+                >
+                  <span
+                    id="CERTIFICATE_MENU"
+                    ng-click="toggle_selection( top_menu)"
+                    ng-class="selected_class( top_menu)"
+                    class="ng-binding"
+                  >
+                    Certificates
+                    <span class="symbol">▾</span>
+                  </span>
+                  <div
+                    class="s-shaded ng-hide"
+                    style="top: 97.0859375; left: 19.828125"
+                    ng-show="is_menu_active( top_menu )"
+                  >
+                    <ul>
+                      <!-- ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Find
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Create
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Save
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Edit Event Info
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Abandon Certificate
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Attest Certifier other than Attendant
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Print Scan &amp; Upload Signature Worksheet
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                    </ul>
+                  </div> </span
+                ><!-- end ngRepeat: top_menu in menu --><span
+                  ng-repeat="top_menu in menu"
+                  class="ng-scope"
+                >
+                  <span
+                    id="VALIDATE_MENU"
+                    ng-click="toggle_selection( top_menu)"
+                    ng-class="selected_class( top_menu)"
+                    class="ng-binding"
+                  >
+                    Validation
+                    <span class="symbol">▾</span>
+                  </span>
+                  <div
+                    class="s-shaded ng-hide"
+                    style="top: 97.0859375; left: 19.828125"
+                    ng-show="is_menu_active( top_menu )"
+                  >
+                    <ul>
+                      <!-- ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Validate Public Use
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Validate Confidential Use
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Validate SSN Request
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Validate All
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                    </ul>
+                  </div> </span
+                ><!-- end ngRepeat: top_menu in menu --><span
+                  ng-repeat="top_menu in menu"
+                  class="ng-scope"
+                >
+                  <span
+                    id="HELP_MENU"
+                    ng-click="toggle_selection( top_menu)"
+                    ng-class="selected_class( top_menu)"
+                    class="ng-binding"
+                  >
+                    Help
+                    <span class="symbol">▾</span>
+                  </span>
+                  <div
+                    class="s-shaded ng-hide"
+                    style="top: 97.0859375; left: 19.828125"
+                    ng-show="is_menu_active( top_menu )"
+                  >
+                    <ul>
+                      <!-- ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Contact Information
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        County Contacts
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        CAL IVRS Account Registration Form
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        CAL IVRS Account Modification Form
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        CAL IVRS Affidavit for Amendment
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope s-disabled"
+                      >
+                        --- Birth ---
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Worksheet Packet
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Hispanic/Race Worksheet
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Privacy Notification
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook - Intro
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – BC
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Other Types
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Amendments
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Certified Copies
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Access
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Verification
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook - Fees
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Append A (Forms)
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Append B (Occupation)
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Append C (Industry)
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        EBRS User Guide – BC
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Online Pamphlets
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Birth Amendment Overview
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Out-of-Hospital Pamphlet
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope s-disabled"
+                      >
+                        --- Fetal Death ---
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Worksheet Packet
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Parent Race and Ethnicity Worksheet
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Privacy Notification
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook Intro
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook - FD
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Amendments
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Handbook – Disposition Permit Section
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        EBRS - FD USER GUIDE
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        Surrogate Fetal Death Registration
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                      <li
+                        ng-repeat="sub_menu in top_menu.items"
+                        ng-click="send_selection_event( sub_menu)"
+                        ng-class="disabled_class( sub_menu )"
+                        class="ng-binding ng-scope"
+                      >
+                        COD Help List
+                      </li>
+                      <!-- end ngRepeat: sub_menu in top_menu.items -->
+                    </ul>
+                  </div> </span
+                ><!-- end ngRepeat: top_menu in menu -->
+                <!-- ngIf: show_settings() --><span
+                  style="width: 100%; padding: 0"
+                  ng-if="show_settings()"
+                  class="ng-scope"
+                >
+                  <span
+                    style="float: right; width: auto"
+                    ng-click="localSettings()"
+                  >
+                    <svg height="1.75em" width="1.75em">
+                      <defs>
+                        <clippath>
+                          <path fill="#f2f2f2" d="m7 1023.36h1v1h-1z"></path>
+                        </clippath>
+                      </defs>
+                      <path
+                        d="m124.92 52.2c-.436-.571-1-.911-1.711-1.019l-14.909-2.281c-.815-2.607-1.929-5.268-3.341-7.984.977-1.358 2.443-3.272 4.398-5.744 1.955-2.472 3.34-4.277 4.155-5.418.435-.598.651-1.222.651-1.874 0-.76-.189-1.357-.57-1.792-1.955-2.771-6.436-7.387-13.443-13.851-.65-.543-1.33-.814-2.035-.814-.815 0-1.467.244-1.956.732l-11.568 8.718c-2.228-1.141-4.672-2.146-7.333-3.02l-2.281-14.99c-.054-.706-.367-1.29-.937-1.752-.571-.462-1.235-.692-1.997-.692h-18.09c-1.575 0-2.553.76-2.933 2.281-.706 2.715-1.494 7.766-2.363 15.15-2.553.816-5.02 1.848-7.414 3.097l-11.243-8.718c-.706-.543-1.412-.814-2.118-.814-1.195 0-3.761 1.941-7.699 5.825-3.938 3.884-6.612 6.803-8.03 8.758-.489.706-.733 1.331-.733 1.874 0 .652.271 1.304.814 1.955 3.639 4.4 6.545 8.147 8.718 11.244-1.358 2.498-2.417 4.997-3.177 7.495l-15.15 2.281c-.597.109-1.113.462-1.548 1.06-.435.597-.652 1.222-.652 1.873v18.09c0 .707.217 1.344.652 1.914.435.571 1 .912 1.711 1.02l14.91 2.2c.76 2.661 1.873 5.349 3.34 8.06-.977 1.358-2.444 3.272-4.399 5.744-1.955 2.472-3.341 4.277-4.155 5.418-.435.599-.652 1.222-.652 1.874 0 .706.19 1.33.57 1.873 2.118 2.934 6.599 7.497 13.443 13.688.598.598 1.277.896 2.037.896.815 0 1.494-.244 2.037-.732l11.488-8.719c2.228 1.141 4.672 2.146 7.333 3.02l2.281 14.99c.055.706.367 1.29.937 1.752.57.463 1.236.692 1.996.692h18.09c1.577 0 2.554-.76 2.935-2.281.705-2.716 1.492-7.766 2.361-15.15 2.553-.815 5.03-1.848 7.414-3.097l11.244 8.8c.76.488 1.467.732 2.118.732 1.194 0 3.747-1.927 7.657-5.784 3.912-3.856 6.6-6.79 8.06-8.8.489-.543.734-1.167.734-1.873 0-.706-.271-1.387-.815-2.037-3.91-4.78-6.816-8.527-8.718-11.243 1.086-2.01 2.146-4.481 3.178-7.414l15.07-2.28c.651-.109 1.196-.463 1.63-1.061.434-.598.65-1.223.65-1.874v-18.09c.0001-.706-.215-1.343-.651-1.914m-47.17 25.541c-4.073 4.074-8.989 6.111-14.747 6.111-5.758 0-10.673-2.037-14.747-6.111-4.073-4.073-6.11-8.988-6.11-14.746 0-5.758 2.036-10.673 6.11-14.747 4.074-4.073 8.99-6.11 14.747-6.11 5.758 0 10.674 2.037 14.747 6.11 4.073 4.074 6.11 8.989 6.11 14.747 0 5.758-2.037 10.673-6.11 14.746"
+                        transform="matrix(.12786 0 0 .12786 2.949 2.956)"
+                        fill="#4d4d4d"
+                      ></path>
+                    </svg>
+                  </span> </span
+                ><!-- end ngIf: show_settings() -->
+              </div>
+              <!-- end ngIf: $root.rt_mod.settings.floating.menu -->
+              <!-- ngIf: $root.rt_mod.show_settings -->
+              <!-- ngIf: $root.rt_ctl.is_float_name_status() -->
+              <div ng-if="$root.rt_ctl.is_float_name_status()" class="ng-scope">
+                <div class="s-header VS_10D">
+                  <div ng-show="$ctrl.vm.cert.birthId">
+                    <!-- DO NOT - will not update: ng-init="thisChild = $ctrl.vm.cert.personalInfo.thisChild" -->
+                    <fieldset class="s-round-top">
+                      <div style="float: left">
+                        <label>1C. Last Name:</label>
+                        <span class="ng-binding"> Test </span>
+                        <label>1A. First Name:</label>
+                        <span class="ng-binding"> Electronic sig </span>
+                        <label
+                          ng-show="$ctrl.vm.cert.personalInfo.thisChild.emrNumber"
+                        >
+                          MRN-NB:
+                        </label>
+                        <span
+                          ng-show="$ctrl.vm.cert.personalInfo.thisChild.emrNumber"
+                          class="ng-binding"
+                        >
+                          45345435
+                        </span>
+                      </div>
+                      <div style="float: right">
+                        <label>9C. Parent Giving Birth Last Name: </label>
+                        <span class="ng-binding"> Gala </span>
+                        <label>2. Sex:</label>
+                        <span class="ng-binding"> MALE </span>
+                        <label>Record:</label>
+                        <span class="ng-binding"> 1006859 </span>
+                      </div>
+                    </fieldset>
+                    <fieldset>
+                      <table style="border: none; width: 100%">
+                        <tbody>
+                          <tr>
+                            <td style="text-align: left">
+                              <label class="ng-binding">3A. This Birth:</label>
+                              <span class="ng-binding"> SINGLE </span>
+                              <label class="ng-binding"
+                                >3B. If Multiple, This Child:</label
+                              >
+                              <span class="ng-binding">
+                                -
+                                <span
+                                  menu="$root.rt_mod.menu"
+                                  action="LIST_LINKED"
+                                  class="ng-isolate-scope"
+                                >
+                                  <!-- ngIf: ! actions --><span
+                                    class="button ng-binding ng-scope ng-hide"
+                                    ng-if="! actions"
+                                    ng-show="label"
+                                    ng-click="run_action()"
+                                  >
+                                  </span
+                                  ><!-- end ngIf: ! actions -->
+                                  <!-- ngRepeat: action in actions -->
+                                </span>
+                              </span>
+                            </td>
+                            <td style="text-align: center">
+                              <span
+                                style="font-size: 14pt; font-weight: bold"
+                                class="ng-binding"
+                                >Live Birth</span
+                              >
+                            </td>
+                            <td style="text-align: right">
+                              <label class="ng-binding"
+                                >4A/4B. Date/Time of Birth:</label
+                              >
+                              <span class="ng-binding"> 09/05/2024 0900 </span>
+                              <label>Status:</label>
+                              <span class="ng-binding"> INC </span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </fieldset>
+                  </div>
+                  <fieldset ng-show="$ctrl.vm.amend.type" class="ng-hide">
+                    <div style="float: left">
+                      <!-- TODO - mapping to option label for amendment type -->
+                      <span class="ng-binding"> </span>
+                      <span
+                        ng-show="$root.rt_ctl.is_replacement_amend( $ctrl.vm.amend )"
+                        class="ng-hide"
+                      >
+                        (Replacement)
+                      </span>
+                    </div>
+                    <div style="float: right">
+                      <label>Amendment:</label>
+                      <span class="ng-binding"> </span>
+                      <label>ID:</label>
+                      <span class="ng-binding"> </span>
+                      <label>Status:</label>
+                      <span class="ng-binding"> </span>
+                    </div>
+                  </fieldset>
+                  <fieldset ng-show="$ctrl.vm.amend_req.req_id" class="ng-hide">
+                    <div style="float: left">
+                      <label>1C. Last Name:</label>
+                      <span id="hdr-1C" class="ng-binding"> </span>
+                      <label>1A. First Name:</label>
+                      <span id="hdr-1A" class="ng-binding"> </span>
+                    </div>
+                    <div id="hdr_req_id" style="float: right">
+                      <label>Request ID:</label>
+                      <span class="ng-binding"> </span>
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
+              <!-- end ngIf: $root.rt_ctl.is_float_name_status() -->
+              <!-- ngIf: $root.rt_mod.settings.floating.msgs -->
+            </div>
+          </div>
           <!-- end ngIf: $root.rt_ctl.is_floater() -->
           <div
             class="hdr_ftr_colors ng-isolate-scope"
@@ -765,12 +1409,43 @@
               </tbody>
             </table>
           </div>
+          <!-- ngIf: $root.rt_ctl.is_floater() -->
+          <div
+            id="floating_spacer"
+            ng-if="$root.rt_ctl.is_floater()"
+            class="ng-scope"
+          >
+            <p>This spaced reserved for floating header</p>
+          </div>
+          <!-- end ngIf: $root.rt_ctl.is_floater() -->
+          <!-- ngIf: ! $root.rt_mod.settings.floating.menu -->
+          <!-- ngIf: $root.rt_mod.show_settings && ( ! $root.rt_mod.settings.floating.menu ) -->
+          <!-- ngIf: ! $root.rt_mod.settings.floating.msgs -->
         </br-root></ui-view
       >
     </div>
 
-    <h1>CA Birth Certificates</h1>
-    <h2>Scan the QR code to sign the certificate</h2>
-    <img src="qr_code.png" alt="Certificate QR Code" width="400" height="400" />
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        width: 100%;
+        height: calc(100% - 202px);
+      "
+    >
+      <h2>
+        Please scan the QR code with your mobile device to E-Sign the
+        certificate
+      </h2>
+      <img
+        src="qr_code.png"
+        alt="Certificate QR Code"
+        width="400"
+        height="400"
+      />
+    </div>
   </body>
 </html>
