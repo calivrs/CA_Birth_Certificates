@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CA Birth Certificates</title>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
+  </head>
+  <body>
+    <div id="pdfViewer"></div>
+    <canvas
+      id="signatureCanvas"
+      width="400"
+      height="200"
+      style="border: 2px solid black"
+    ></canvas>
+    <button onclick="saveSignatureAndInsertIntoPDF()">Save</button>
+
+    <script>
+      const signatureCanvas = document.getElementById("signatureCanvas");
+
+      const resizedCanvas = document.createElement("canvas");
+      const resizedContext = resizedCanvas.getContext("2d");
+      resizedCanvas.height = "35";
+      resizedCanvas.width = "70";
+
+      const signaturePad = new SignaturePad(signatureCanvas);
+
+      async function saveSignatureAndInsertIntoPDF() {
+        resizedContext.drawImage(signatureCanvas, 0, 0, 70, 35);
+
+        const signatureDataUrl = resizedCanvas.toDataURL("image/png");
+
+        const modifiedPDFBytes = await insertSignatureIntoPDF(signatureDataUrl);
+
+        downloadModifiedPDF(modifiedPDFBytes);
+      }
+
+      async function insertSignatureIntoPDF(signatureDataURL) {
+        const pdfBytes = await fetch(
+          "https://benjaminjohnson2204.github.io/CA_Birth_Certificates/birth_certificate_sample.pdf"
+        ).then((res) => res.arrayBuffer());
+        const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+
+        const signatureImageArray = dataURLToUint8Array(signatureDataURL);
+
+        const signatureImage = await pdfDoc.embedPng(signatureImageArray);
+        const { width, height } = signatureImage;
+
+        const pages = pdfDoc.getPages();
+        const firstPage = pages[0];
+
+        const x = 165;
+        const y = firstPage.getHeight() - 200 - height;
+
+        firstPage.drawImage(signatureImage, {
+          x,
+          y,
+          width,
+          height
+        });
+
+        const modifiedPDFBytes = await pdfDoc.save();
+        return modifiedPDFBytes;
+      }
+
+      function dataURLToUint8Array(dataURL) {
+        const base64 = dataURL.split(",")[1];
+
+        const binaryString = atob(base64);
+
+        const array = new Uint8Array(binaryString.length);
+
+        for (let i = 0; i < binaryString.length; i++) {
+          array[i] = binaryString.charCodeAt(i);
+        }
+        return array;
+      }
+
+      function downloadModifiedPDF(modifiedPDFBytes) {
+        const blob = new Blob([modifiedPDFBytes], {
+          type: "application/pdf"
+        });
+        const url = URL.createObjectURL(blob);
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = "birth_certificate_sample_signed.pdf";
+
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      }
+    </script>
+  </body>
+</html>
