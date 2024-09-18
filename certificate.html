@@ -49,25 +49,12 @@
       window.addEventListener("resize", resizeCanvas, false);
       resizeCanvas();
 
-      const resized12ACanvas = document.createElement("canvas");
-      const resized12AContext = resized12ACanvas.getContext("2d");
-      resized12ACanvas.height = "35";
-      resized12ACanvas.width = "70";
-
-      const resized13ACanvas = document.createElement("canvas");
-      const resized13AContext = resized13ACanvas.getContext("2d");
-      resized13ACanvas.height = "35";
-      resized13ACanvas.width = "70";
-
       const signature12APad = new SignaturePad(signature12ACanvas);
       const signature13APad = new SignaturePad(signature13ACanvas);
 
       async function saveSignaturesAndInsertIntoPDF() {
-        resized12AContext.drawImage(signature12ACanvas, 0, 0, 70, 35);
-        resized13AContext.drawImage(signature13ACanvas, 0, 0, 70, 35);
-
-        const signature12ADataUrl = resized12ACanvas.toDataURL("image/png");
-        const signature13ADataUrl = resized13ACanvas.toDataURL("image/png");
+        const signature12ADataUrl = signature12ACanvas.toDataURL("image/png");
+        const signature13ADataUrl = signature13ACanvas.toDataURL("image/png");
 
         const modifiedPDFBytes = await insertSignatureIntoPDF(
           signature12ADataUrl,
@@ -94,9 +81,9 @@
 
         firstPage.drawImage(signature12AImage, {
           x: 165,
-          y: pageHeight - 200 - signature12AImage.height,
-          width: signature12AImage.width,
-          height: signature12AImage.height
+          y: pageHeight - 200 - 35,
+          width: 70,
+          height: 35
         });
 
         const signature13AImageArray = dataURLToUint8Array(signature13ADataUrl);
@@ -104,9 +91,9 @@
 
         firstPage.drawImage(signature13AImage, {
           x: 165,
-          y: pageHeight - 225 - signature13AImage.height,
-          width: signature13AImage.width,
-          height: signature13AImage.height
+          y: pageHeight - 225 - 35,
+          width: 70,
+          height: 35
         });
 
         const modifiedPDFBytes = await pdfDoc.save();
