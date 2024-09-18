@@ -1,9 +1,774 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CA Birth Certificates</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+      @charset "UTF-8";
+      [ng\:cloak],
+      [ng-cloak],
+      [data-ng-cloak],
+      [x-ng-cloak],
+      .ng-cloak,
+      .x-ng-cloak,
+      .ng-hide:not(.ng-hide-animate) {
+        display: none !important;
+      }
+      ng\:form {
+        display: block;
+      }
+      .ng-animate-shim {
+        visibility: hidden;
+      }
+      .ng-anchor {
+        position: absolute;
+      }
+    </style>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>California Electronic Birth Registration System</title>
   </head>
   <body>
+    <div ng-app="birth" class="ng-scope">
+      <!-- uiView: --><ui-view class="ng-scope"
+        ><br-root
+          pre-window-dressing="::$resolve.preWindowDressing"
+          pre-birth-options="::$resolve.preBirthOptions"
+          pre-ref="::$resolve.preRef"
+          class="ng-scope ng-isolate-scope"
+        >
+          <style
+            type="text/css"
+            window-dressing="$ctrl.win_dress"
+            class="ng-binding ng-isolate-scope"
+          >
+            body {
+              font-family: Verdana, Arial, sans-serif;
+              font-size: 8pt;
+              background-color: #eaecee;
+              margin: 0px;
+              cursor: default;
+            }
+
+            /*
+  table {
+      TODO - find where/when to put this: margin: 0.5em 1em;
+  }
+  */
+
+            button,
+            input[type="button"],
+            .button {
+              font-weight: bold;
+              text-align: center;
+              text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.7);
+              color: #4f4f4f;
+              background: #e7e7e7;
+              background: #c4c4c4
+                linear-gradient(
+                  top,
+                  rgba(255, 255, 255, 0.8),
+                  rgba(255, 255, 255, 0)
+                );
+              background: #c4c4c4 -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0.8)), to(rgba(255, 255, 255, 0)));
+              background: #c4c4c4 -moz-linear-gradient(top, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+
+              padding: 0.2em 0.5em;
+              border: 1px solid #a8a8a8;
+              border-radius: 3px;
+              box-shadow: inset 0px 1px 0px #fff;
+              margin: 0.25em 0.75em;
+              /* display: block; */
+            }
+
+            /* window dressing header/footer styles */
+            .hdr_ftr_colors,
+            .hdr_ftr_colors a {
+              background-color: #9ba87a;
+              color: white;
+            }
+
+            /* heading styles */
+            h1,
+            h2,
+            h3,
+            h4 {
+              font-family: Verdana, Arial, sans-serif;
+              color: #003464;
+              margin: 0.67em 2px 0.67em 2px;
+            }
+
+            h1 {
+              font-size: 14pt;
+            }
+
+            h2 {
+              font-size: 12pt;
+            }
+
+            h3 {
+              font-size: 10pt;
+            }
+
+            .symbol {
+              font: 1.5em "Georgia", "Apple Symbols", serif;
+              vertical-align: middle;
+            }
+
+            /** prev/next search table buttons when disabled */
+            .button .disabled {
+              color: #cfcfcf;
+            }
+
+            /* backdrop for "modal dialog" type activity */
+            div.s-modal-bg {
+              z-index: 500;
+              background-color: rgba(68, 68, 68, 0.75);
+              padding: 3em 10em 3em 10em;
+              position: fixed;
+              top: 0;
+              bottom: 0;
+              left: 0;
+              right: 0;
+            }
+
+            /* curtain over the main screen while long-running, must complete, I/O is active */
+            div.s-io-throbber {
+              z-index: 9000;
+              background-color: rgba(68, 68, 68, 0.5);
+              position: fixed;
+              top: 0;
+              bottom: 0;
+              left: 0;
+              right: 0;
+            }
+
+            /* the spinner / throbber displayed while the I/O is running */
+            div.s-io-throbber > div {
+              border: 16px solid #f3f3f3;
+              border-radius: 50%;
+              border-top: 16px solid #3498db;
+              width: 60px;
+              height: 60px;
+              -webkit-animation: spin 2s linear infinite;
+              animation: spin 1.25s linear infinite;
+              margin: 0 auto;
+              z-index: +1;
+            }
+            @-webkit-keyframes spin {
+              0% {
+                -webkit-transform: rotate(0deg);
+              }
+              100% {
+                -webkit-transform: rotate(360deg);
+              }
+            }
+            @keyframes spin {
+              0% {
+                transform: rotate(0deg);
+              }
+              100% {
+                transform: rotate(360deg);
+              }
+            }
+
+            /* text displayed while waiting */
+            div.s-io-throbber > p {
+              text-align: center;
+              font-size: 20pt;
+              padding: 3em;
+            }
+
+            /* TRANSIENT (but "important") background color for elements indicating that they are busy (pending I/O, etc) */
+            .s-busy * {
+              background-color: lightgrey !important ;
+            }
+
+            /* top level menu items */
+            .s-menu span {
+              width: 21em;
+            }
+
+            /* second level menu list (outer container) */
+            .s-menu div {
+              position: absolute;
+              z-index: 250;
+            }
+
+            /* second level menu list */
+            .s-menu ul {
+              display: block;
+              margin: 0.25em;
+              padding-left: 1em;
+              /*
+      position: relative;
+      left: -3em;
+      top: 1em;
+      */
+            }
+
+            /* second level menu items */
+            .s-menu ul li {
+              display: inherit;
+            }
+
+            .s-menu span,
+            .s-menu ul li {
+              padding: 3px;
+            }
+
+            /*
+   * Disabled menu option styling:
+   * Use very specific selector path to override "hover" selector
+   */
+            .s-menu div ul li.s-disabled {
+              color: #dddddd;
+              background: #555555;
+              font-style: italic;
+              text-shadow: none;
+            }
+
+            ul.s-tab {
+              position: fixed;
+              left: 0;
+              right: 1em;
+              bottom: 0;
+              margin-top: 0em;
+              margin-bottom: 0em;
+            }
+
+            ul.s-tab li {
+              border: 1px solid #000;
+              /* border-bottom-width: 0; */
+              border-radius: 3px;
+              margin: 3px 3px 3px 3px;
+              padding: 5px 5px 5px 5px;
+              display: inline;
+            }
+
+            /* active selections */
+            .s-active,
+            h3.s-fold,
+            ul.s-tab li,
+            .s-menu li:hover {
+              text-shadow: 1px 3px 0px rgba(255, 255, 255, 0.5);
+              background: #85b2cb;
+              background: #85b2cb
+                linear-gradient(
+                  top,
+                  rgba(255, 255, 255, 0),
+                  rgba(255, 255, 255, 0.4)
+                );
+              background: #85b2cb -moz-linear-gradient(top, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.4));
+              background: #85b2cb -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(rgba(255, 255, 255, 0.4)));
+            }
+            h3.s-fold,
+            ul.s-tab li {
+              font-size: 1em;
+              font-weight: bold;
+              color: #1c4257;
+              margin-top: 1px;
+              line-height: 2;
+            }
+            h3.s-fold {
+              padding: 0.3em;
+              /* border-radius: 2em 2em 0 0;*/
+              margin: 0.5em 2px;
+            }
+
+            /* in-active selections */
+            h3.s-inactive,
+            ul.s-tab li.s-inactive {
+              background: #c7c7c7;
+            }
+            /*
+  h3.s-fold.s-inactive {
+      border-radius: 2em;
+      margin: 0.5em;
+      font-weight: normal;
+  }
+  */
+            /** active tab */
+            ul.s-tab li {
+              font-size: 1.3em;
+            }
+
+            /** inactive tab */
+            ul.s-tab li.s-inactive {
+              font-size: 1em;
+            }
+
+            /** completed, (active?) tab */
+            .s-tab .s-complete {
+              font-style: italic;
+              background: #85cbb2;
+              background: #85cbb2
+                linear-gradient(
+                  top,
+                  rgba(255, 255, 255, 0),
+                  rgba(255, 255, 255, 0.4)
+                );
+              background: #85cbb2 -moz-linear-gradient(top, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.4));
+              background: #85cbb2 -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(rgba(255, 255, 255, 0.4)));
+            }
+
+            /** completed, inactive (color override) tab */
+            .s-tab .s-complete.s-inactive {
+              background: #c7d7c7;
+            }
+
+            /* basic white panel with an outline in which is "actual work" entry fields */
+            div.s-workarea {
+              font-family: Arial, sans-serif;
+              font-size: 1.1em;
+              color: #4f4f4f;
+              background: #ffffff;
+              padding: 0.2em;
+              overflow: hidden; /* capture "floaters" */
+            }
+
+            /* page header area layout, such as "decedent header */
+            /* TODO: revisit the display / sizing of this element - outer display??? */
+            div.s-header fieldset {
+              width: 98%;
+              background-color: #f0f0f0;
+              border-color: inherit;
+            }
+
+            div.s-workarea,
+            fieldset,
+            .s-workarea table {
+              border: 1px solid #a8a8a8;
+              border-radius: 3px;
+              margin: 2px;
+            }
+
+            fieldset {
+              display: block;
+              vertical-align: top;
+            }
+
+            /* center dialogs (with alternate colored rows) that pop up over main form */
+            div.s-modal-bg > div.s-workarea > table.s-datagrid {
+              margin-left: auto;
+              margin-right: auto;
+            }
+
+            /* nested fieldsets (field sub-groups) */
+            div.s-workarea div fieldset fieldset {
+              width: auto;
+              margin-bottom: 0.5em;
+            }
+
+            /* prevent wrapped text in a label from impacting placement of next line (kicking next label to the right) */
+            fieldset div {
+              overflow: auto;
+            }
+
+            label {
+              display: inline-block;
+              float: left;
+              width: 20em; /* TODO: tune per field block */
+              vertical-align: top;
+              text-align: right;
+              margin-right: 0.75em;
+            }
+
+            label.s-cont {
+              float: none;
+              width: auto;
+            }
+
+            .s-required {
+              color: #ea6464;
+            }
+
+            div.s-header fieldset label {
+              width: auto;
+              float: none;
+              margin-left: 3em;
+              margin-right: 2px;
+            }
+
+            div.s-header fieldset span {
+              font-weight: bold;
+            }
+
+            fieldset input,
+            fieldset select,
+            fieldset textarea {
+              margin-top: 1px;
+              margin-bottom: 2px;
+              vertical-align: top;
+            }
+
+            fieldset textarea {
+              font-family: inherit;
+              font-size: inherit;
+              text-size-adjust: inherit;
+            }
+
+            /* highlight block, when applied */
+            .s-highlight {
+              background-color: #f7f7dd;
+            }
+
+            /* inline lookup data table (outer container) */
+            [inline-lookup] input ~ div {
+              position: absolute;
+              z-index: 250;
+            }
+
+            .s-datagrid table,
+            table.s-datagrid {
+              font-size: 1.1em;
+              color: #4f4f4f;
+              background: #ffffff;
+              border-width: 1px;
+              border-style: solid;
+              border-color: inherit;
+              border-collapse: collapse;
+            }
+
+            .s-datagrid tr:nth-child(even) {
+              background: none repeat scroll 0 0 #f2f5f9;
+            }
+
+            /* centering some items on "control" gray gradient area */
+            .s-datagrid th,
+            th.s-shaded,
+            td.s-shaded,
+            .s-shaded th,
+            .s-shaded td {
+              text-align: center;
+              alignment: center;
+            }
+
+            /* create a gray gradient area for (some) controls to be placed */
+            div.s-shaded,
+            .s-datagrid th,
+            th.s-shaded,
+            td.s-shaded,
+            .s-shaded th,
+            .s-shaded td {
+              padding: 0.4em 1em;
+              border-width: 1px;
+              border-style: solid;
+              border-color: inherit;
+              background: #cecece;
+              background: #c4c4c4
+                linear-gradient(
+                  top,
+                  rgba(255, 255, 255, 0.8),
+                  rgba(255, 255, 255, 0)
+                );
+              background: #c4c4c4 -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0.8)), to(rgba(255, 255, 255, 0)));
+              background: #c4c4c4 -moz-linear-gradient(top, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+            }
+
+            .s-datagrid td {
+              text-align: center;
+              alignment: center;
+              padding: 0.4em 1em;
+              border-width: 1px;
+              border-style: solid;
+              border-color: inherit;
+            }
+
+            .s-entryform {
+              font-size: 1.1em;
+              border-collapse: collapse;
+            }
+
+            .s-entryform tbody {
+              color: #4f4f4f;
+              background: #ffffff;
+              border: 1px solid #a8a8a8;
+            }
+
+            .s-entryform td {
+              padding: 4px 10px;
+              border-width: 1px;
+              border-style: solid;
+              border-color: inherit;
+            }
+
+            .s-entryform button {
+              /* font-size: 1em; */
+              font-weight: bold;
+              color: #4f4f4f;
+              text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.7);
+              padding: 0.4em 1em;
+              line-height: 1.4;
+            }
+
+            :disabled {
+              font-weight: bold;
+              color: #000;
+              background-color: #f0f0f0;
+            }
+
+            /* error message layout */
+            div.s-error,
+            tr.s-error {
+              color: #d8000c;
+              background-color: #ffaaaa;
+            }
+
+            /* warning message layout */
+            div.s-warn {
+              color: #cc650b;
+              background-color: #eeeca3;
+            }
+
+            /* info message layout */
+            div.s-info {
+              color: #009900;
+              background-color: #dbffe0;
+            }
+
+            /* suggestion message layout */
+            div.s-sugg {
+              color: #3366cc;
+              background-color: #33ccff;
+            }
+
+            div.s-error,
+            div.s-warn,
+            div.s-info,
+            div.s-sugg {
+              font-weight: bold;
+              padding: 0.2em;
+              border: 1px solid;
+              border-radius: 3px;
+              margin: 0.75em;
+            }
+
+            .s-error li,
+            .s-warn li,
+            .s-info li,
+            .s-sugg li {
+              list-style-type: none;
+              text-indent: -2.5em;
+              padding: 0.2em;
+              margin-right: 3.5em;
+            }
+            .s-sugg .s-sugg-word {
+              padding: 0.2em;
+              margin-left: 0.2em;
+              font-weight: bold;
+            }
+            /* transient message background bounding box */
+            #tran_fld_msg > div > div {
+              padding-right: 1em;
+              margin: 0;
+            }
+
+            /* transient message text/foreground color (FYI: on top of transparent alpha setting) */
+            #tran_fld_msg li {
+              color: black;
+            }
+
+            /* decorate "clickables" like a link */
+            .s-link {
+              cursor: pointer;
+              text-decoration: underline;
+            }
+
+            .ui-state-warning {
+              border: 1px solid #9f6000;
+              background-color: #feefb3;
+            }
+
+            .ui-state-error {
+              background-color: #ffbaba;
+            }
+
+            input.s-error {
+              border-color: #d8000c;
+            }
+
+            .s-error .s-inverse {
+              color: #f7f7f7;
+              background-color: #910a0a;
+              border-width: 2px;
+              border-style: solid;
+              border-radius: 2px;
+              border-color: #f7f7f7;
+            }
+          </style>
+          <style type="text/css" class="ng-binding">
+            div#fld_msg_modal {
+              width: 500px;
+              min-height: 80px;
+              position: fixed;
+              top: 20%;
+              left: 45%;
+              margin-top: -50px;
+              margin-left: -150px;
+              background-color: white;
+              border-radius: 5px;
+              text-align: center;
+              z-index: 111; /* 1px higher than the overlay layer */
+            }
+            .s-header.VS_10D fieldset {
+              background-color: rgba(71, 182, 242, 0.5);
+            }
+            .s-header.VS_12 fieldset {
+              background-color: rgba(171, 124, 223, 0.5);
+            }
+            .modalclosebtn {
+              margin: 5px 15px 5px 0;
+              font-size: xx-large;
+              color: red;
+              font-weight: bold;
+              float: right;
+            }
+            div#modal_overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              height: 100%;
+              width: 100%;
+              background-color: rgba(0, 0, 0, 0.5);
+              z-index: 110;
+            }
+            div#floating_hdr {
+              z-index: 50;
+              position: fixed;
+              left: 0;
+              width: 100%;
+              background-color: #eaecee;
+              top: 66px;
+            }
+            div#floating_hdr > div {
+              padding: 0.25em;
+              border-style: solid;
+              border-radius: 0.25em;
+              border-width: 0.25em;
+              border-color: #9ba87a;
+            }
+            div#floating_spacer {
+              height: 138px;
+            }
+            /* short (confirmation) form appearance */
+            div.short-form {
+              padding: 0.5em;
+            }
+            div.short-form p.short-form-emphasis {
+              color: red;
+              font-weight: bold;
+            }
+            /* TODO - tune settings fieldset widths for Windows chunky browser(s) */
+            fieldset.settings {
+              width: 28em;
+              display: inline-block;
+            }
+            fieldset.settings label {
+              width: 23em;
+            }
+
+            /* signature review (upload) column layout (fixed first column, fill the rest) */
+            .sig-rvw-panes {
+              width: 98%;
+              margin: 0.5em;
+              display: grid;
+              grid-template-columns: 60em auto;
+              justify-items: left;
+              align-items: center;
+              column-gap: 1em;
+            }
+            .sig-rvw-panes .sig-rvw-names {
+              grid-row-start: 1;
+              grid-column-start: 1;
+            }
+            .sig-rvw-panes .sig-rvw-img {
+              grid-row-start: 1;
+              grid-column-start: 2;
+              width: 98%;
+            }
+            /* Squeeze in name labels to narrow the display beside the signature image/PDF. */
+            .sig-rvw-names fieldset div label {
+              width: 16em;
+            }
+            /** target name suffixes for reformat as separate line */
+            .sig-rvw-names
+              fieldset
+              ng-transclude
+              span[ng-show="is_suffix_required()"] {
+              display: grid;
+              grid-template-columns: 16em 6em;
+              column-gap: 1em;
+              align-items: center;
+            }
+            /** inline supplemental confirmation inserted above other material */
+            .conf-above {
+              margin-bottom: 2em;
+            }
+          </style>
+          <!-- ngIf: $root.rt_ctl.is_floater() -->
+          <div
+            id="floating_hdr"
+            ng-if="$root.rt_ctl.is_floater()"
+            class="ng-scope"
+          ></div>
+          <!-- end ngIf: $root.rt_ctl.is_floater() -->
+          <div
+            class="hdr_ftr_colors ng-isolate-scope"
+            style="padding: 5px"
+            window-dressing="$ctrl.win_dress"
+            timer="$ctrl.timer"
+          >
+            <table style="width: 100%">
+              <tbody>
+                <tr>
+                  <!-- ngIf: timer -->
+                  <td ng-if="timer" class="ng-scope">
+                    <p class="ng-binding">16:24</p>
+                    <!-- TODO - optionally re-enable logo with image link attribute 
+                  <img src="' + root_link + '/images/applogo.jpg"/>
+  -->
+                  </td>
+                  <!-- end ngIf: timer -->
+                  <td style="width: 99%">
+                    <div style="text-align: right; font-size: 14pt">
+                      <span class="ng-binding"
+                        >California Electronic Birth Registration System</span
+                      >
+                    </div>
+                    <!-- ngIf: is_edrs() -->
+                    <div
+                      style="text-align: right; font-size: 10pt"
+                      ng-if="is_edrs()"
+                      class="ng-scope"
+                    >
+                      <span class="ng-binding">
+                        Welcome, SUTTER CLERK |
+                        <a
+                          ng-href="http://localhost:8080/ca-admin/html/admin/admin.html#/profile/"
+                          style="color: white"
+                          href="http://localhost:8080/ca-admin/html/admin/admin.html#/profile/"
+                          >Profile</a
+                        >
+                        |
+                        <a
+                          style="color: white"
+                          ng-href="/ca-ebrs/logout"
+                          href="http://localhost:8080/ca-ebrs/logout"
+                        >
+                          Logout
+                        </a>
+                      </span>
+                    </div>
+                    <!-- end ngIf: is_edrs() -->
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </br-root></ui-view
+      >
+    </div>
+
     <h1>CA Birth Certificates</h1>
     <h2>Scan the QR code to sign the certificate</h2>
     <img src="qr_code.png" alt="Certificate QR Code" width="400" height="400" />
