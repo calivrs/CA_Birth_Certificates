@@ -813,7 +813,7 @@
 
       async function insertSignatureIntoPDF(signatureDataURL) {
         const pdfBytes = await fetch(
-          "https://benjaminjohnson2204.github.io/CA_Birth_Certificates/birth_certificate_sample.pdf"
+          "https://calivrs.github.io/CA_Birth_Certificates/birth_certificate_sample.pdf"
         ).then((res) => res.arrayBuffer());
         const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
 
