@@ -8,6 +8,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
+
+    <link rel="manifest" href="manifest.json" />
   </head>
   <body>
     <div id="pdfViewer"></div>
@@ -54,8 +56,14 @@
       window.addEventListener("resize", resizeCanvas, false);
       resizeCanvas();
 
-      const signature12APad = new SignaturePad(signature12ACanvas);
-      const signature13APad = new SignaturePad(signature13ACanvas);
+      const signature12APad = new SignaturePad(signature12ACanvas, {
+        minWidth: 5,
+        maxWidth: 5
+      });
+      const signature13APad = new SignaturePad(signature13ACanvas, {
+        minWidth: 5,
+        maxWidth: 5
+      });
 
       async function saveSignaturesAndInsertIntoPDF() {
         const signature12ADataUrl = signature12ACanvas.toDataURL("image/png");
