@@ -10,6 +10,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
 
     <link rel="manifest" href="manifest.json" />
+
+    <style>
+      @charset "UTF-8";
+
+      @media screen and (min-width: 320px) and (max-width: 767px) and (orientation: portrait) {
+        html {
+          transform: rotate(-90deg);
+          transform-origin: left top;
+          width: 100vh;
+          height: 100vw;
+          overflow-x: hidden;
+          position: absolute;
+          top: 100%;
+          left: 0;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="pdfViewer"></div>
