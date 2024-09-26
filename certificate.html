@@ -8,10 +8,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
+    <script
+      src="https://mozilla.github.io/pdf.js/build/pdf.mjs"
+      type="module"
+    ></script>
 
     <link rel="manifest" href="manifest.json" />
 
-    <style>
+    <!-- <style>
       @charset "UTF-8";
 
       @media screen and (min-width: 240px) and (max-width: 1000px) and (orientation: portrait) {
@@ -26,21 +30,10 @@
           left: 0;
         }
       }
-    </style>
+    </style> -->
   </head>
   <body>
-    <div id="pdfViewer"></div>
-    <h2>12A. PARENT OR OTHER INFORMANT SIGNATURE</h2>
-    <canvas
-      id="signature12ACanvas"
-      style="border: 2px solid black; display: block"
-    ></canvas>
-
-    <h2>13A. ATTENDANT/CERTIFIER - SIGNATURE AND DEGREE OR TITLE</h2>
-    <canvas
-      id="signature13ACanvas"
-      style="border: 2px solid black; display: block"
-    ></canvas>
+    <canvas id="pdfCanvas" style="border: 2px solid black"></canvas>
 
     <div
       style="
@@ -51,79 +44,185 @@
       "
     >
       <button
-        style="width: 300px; height: 60px; font-size: 48px"
-        onclick="saveSignaturesAndInsertIntoPDF()"
+        style="width: 250px; height: 60px; font-size: 48px"
+        onclick="downloadModifiedPDF()"
       >
-        Save
+        Download
       </button>
     </div>
 
-    <script>
-      const signature12ACanvas = document.getElementById("signature12ACanvas");
-      const signature13ACanvas = document.getElementById("signature13ACanvas");
+    <div
+      id="signatureModal"
+      style="
+        display: none;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          width: 325px;
+          height: 200px;
+          background-color: white;
+          padding: 12px;
+          gap: 12px;
+        "
+      >
+        <p id="signaturePadLabel"></p>
+        <div style="position: relative">
+          <canvas
+            id="signatureCanvas"
+            style="border: 2px solid black; display: block"
+            width="300px"
+            height="100px"
+          ></canvas>
+          <!-- <div
+            id="signatureDivider"
+            style="
+              display: none;
+              position: absolute;
+              top: 0;
+              left: 50%;
+              width: 4px;
+              height: 100%;
+              background-color: black;
+            "
+          ></div> -->
+        </div>
 
-      function resizeCanvas() {
-        signature12ACanvas.width = window.innerWidth - 16;
-        signature12ACanvas.height = signature12ACanvas.width / 2;
+        <button
+          style="width: 200px; height: 60px; font-size: 48px"
+          onclick="saveSignaturesAndInsertIntoPDF()"
+        >
+          Save
+        </button>
+      </div>
+    </div>
 
-        signature13ACanvas.width = window.innerWidth - 16;
-        signature13ACanvas.height = signature13ACanvas.width / 2;
+    <script type="module">
+      let isShowingField12 = true;
+
+      let signatureCanvas;
+      let pdfURL;
+
+      function showSignaturePopup() {
+        document.getElementById("signatureModal").style.display = "flex";
+        document.getElementById("signaturePadLabel").innerText =
+          isShowingField12
+            ? "12A. PARENT OR OTHER INFORMANT SIGNATURE"
+            : "13A. ATTENDANT/CERTIFIER - SIGNATURE AND DEGREE OR TITLE";
+        // document.getElementById("signatureDivider").style.display =
+        //   isShowingField12 ? "block" : "none";
+
+        signatureCanvas = document.getElementById("signatureCanvas");
+
+        const signaturePad = new SignaturePad(signatureCanvas, {
+          minWidth: 2,
+          maxWidth: 2
+        });
       }
 
-      window.addEventListener("resize", resizeCanvas, false);
-      resizeCanvas();
+      function hideSignaturePopup() {
+        document.getElementById("signatureModal").style.display = "none";
+      }
 
-      const signature12APad = new SignaturePad(signature12ACanvas, {
-        minWidth: 5,
-        maxWidth: 5
+      const pdfCanvas = document.getElementById("pdfCanvas");
+      pdfCanvas.addEventListener("click", (e) => {
+        const pdfRect = pdfCanvas.getBoundingClientRect();
+        const x = ((e.clientX - pdfRect.x) * 922) / pdfRect.width;
+        const y = ((e.clientY - pdfRect.y) * 1192) / pdfRect.height;
+
+        if (x >= 255 && x <= 620 && y >= 305 && y <= 335) {
+          isShowingField12 = true;
+          showSignaturePopup();
+        } else if (x >= 255 && x <= 620 && y >= 340 && y <= 370) {
+          isShowingField12 = false;
+          showSignaturePopup();
+        }
       });
-      const signature13APad = new SignaturePad(signature13ACanvas, {
-        minWidth: 5,
-        maxWidth: 5
-      });
+
+      var { pdfjsLib } = globalThis;
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://mozilla.github.io/pdf.js/build/pdf.worker.mjs";
+
+      let pdfBytes;
+      let pdfBytesPromise = fetch(
+        "https://calivrs.github.io/CA_Birth_Certificates/birth_certificate_sample.pdf"
+      ).then((res) =>
+        res.arrayBuffer().then((buffer) => {
+          pdfBytes = buffer;
+        })
+      );
+
+      function renderPDF(url) {
+        var loadingTask = pdfjsLib.getDocument(url);
+        loadingTask.promise
+          .then((pdf) => {
+            console.log("Loaded PDF");
+
+            pdf.getPage(1).then((page) => {
+              console.log("Loaded page");
+              var scale = 0.6;
+              var viewport = page.getViewport({ scale: scale });
+
+              // Prepare canvas using PDF page dimensions
+              var context = pdfCanvas.getContext("2d");
+              pdfCanvas.height = viewport.height;
+              pdfCanvas.width = viewport.width;
+
+              // Render PDF page into canvas context
+              var renderContext = {
+                canvasContext: context,
+                viewport
+              };
+              var renderTask = page.render(renderContext);
+              renderTask.promise.then(function () {
+                console.log("Page rendered");
+              });
+            });
+          })
+          .catch((error) => {
+            console.error(`Failed to load PDF, error ${error}`);
+          });
+      }
+      renderPDF(
+        "https://calivrs.github.io/CA_Birth_Certificates/birth_certificate_sample.pdf"
+      );
 
       async function saveSignaturesAndInsertIntoPDF() {
-        const signature12ADataUrl = signature12ACanvas.toDataURL("image/png");
-        const signature13ADataUrl = signature13ACanvas.toDataURL("image/png");
+        const signatureDataUrl = signatureCanvas.toDataURL("image/png");
 
-        const modifiedPDFBytes = await insertSignatureIntoPDF(
-          signature12ADataUrl,
-          signature13ADataUrl
-        );
+        const modifiedPDFBytes = await insertSignatureIntoPDF(signatureDataUrl);
 
-        downloadModifiedPDF(modifiedPDFBytes);
+        saveModifiedPDF(modifiedPDFBytes);
       }
+      window.saveSignaturesAndInsertIntoPDF = saveSignaturesAndInsertIntoPDF;
 
-      async function insertSignatureIntoPDF(
-        signature12ADataUrl,
-        signature13ADataUrl
-      ) {
-        const pdfBytes = await fetch(
-          "https://calivrs.github.io/CA_Birth_Certificates/birth_certificate_sample.pdf"
-        ).then((res) => res.arrayBuffer());
+      async function insertSignatureIntoPDF(signatureDataUrl) {
+        await pdfBytesPromise;
         const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
         const pages = pdfDoc.getPages();
         const firstPage = pages[0];
         const pageHeight = firstPage.getHeight();
 
-        const signature12AImageArray = dataURLToUint8Array(signature12ADataUrl);
-        const signature12AImage = await pdfDoc.embedPng(signature12AImageArray);
+        const signatureImageArray = dataURLToUint8Array(signatureDataUrl);
+        const signatureImage = await pdfDoc.embedPng(signatureImageArray);
 
-        firstPage.drawImage(signature12AImage, {
-          x: 165,
-          y: pageHeight - 200 - 35,
-          width: 70,
-          height: 35
-        });
-
-        const signature13AImageArray = dataURLToUint8Array(signature13ADataUrl);
-        const signature13AImage = await pdfDoc.embedPng(signature13AImageArray);
-
-        firstPage.drawImage(signature13AImage, {
-          x: 165,
-          y: pageHeight - 225 - 35,
-          width: 70,
-          height: 35
+        firstPage.drawImage(signatureImage, {
+          x: 175,
+          y: pageHeight - (isShowingField12 ? 207 : 233) - 15,
+          width: 45,
+          height: 15
         });
 
         const modifiedPDFBytes = await pdfDoc.save();
@@ -143,20 +242,28 @@
         return array;
       }
 
-      function downloadModifiedPDF(modifiedPDFBytes) {
+      function saveModifiedPDF(modifiedPDFBytes) {
         const blob = new Blob([modifiedPDFBytes], {
           type: "application/pdf"
         });
-        const url = URL.createObjectURL(blob);
+        pdfBytesPromise = blob.arrayBuffer().then((buffer) => {
+          pdfBytes = buffer;
+        });
+        pdfURL = URL.createObjectURL(blob);
+        renderPDF(pdfURL);
+        hideSignaturePopup();
+      }
 
+      function downloadModifiedPDF(modifiedPDFBytes) {
         const downloadLink = document.createElement("a");
-        downloadLink.href = url;
+        downloadLink.href = pdfURL;
         downloadLink.download = "birth_certificate_sample_signed.pdf";
 
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
       }
+      window.downloadModifiedPDF = downloadModifiedPDF;
     </script>
   </body>
 </html>
