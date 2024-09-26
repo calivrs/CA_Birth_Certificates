@@ -14,23 +14,6 @@
     ></script>
 
     <link rel="manifest" href="manifest.json" />
-
-    <!-- <style>
-      @charset "UTF-8";
-
-      @media screen and (min-width: 240px) and (max-width: 1000px) and (orientation: portrait) {
-        html {
-          transform: rotate(-90deg);
-          transform-origin: left top;
-          width: 100vh;
-          height: 100vw;
-          overflow-x: hidden;
-          position: absolute;
-          top: 100%;
-          left: 0;
-        }
-      }
-    </style> -->
   </head>
   <body>
     <canvas id="pdfCanvas" style="border: 2px solid black"></canvas>
@@ -70,34 +53,22 @@
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          width: 975px;
-          height: 600px;
           background-color: white;
           padding: 12px;
           gap: 12px;
+          width: calc(100% - 72px);
         "
       >
-        <p id="signaturePadLabel"></p>
-        <div style="position: relative">
-          <canvas
-            id="signatureCanvas"
-            style="border: 2px solid black; display: block"
-            width="900px"
-            height="300px"
-          ></canvas>
-          <!-- <div
-            id="signatureDivider"
-            style="
-              display: none;
-              position: absolute;
-              top: 0;
-              left: 50%;
-              width: 4px;
-              height: 100%;
-              background-color: black;
-            "
-          ></div> -->
-        </div>
+        <p id="signaturePadLabel1"></p>
+        <canvas
+          id="signatureCanvas1"
+          style="border: 2px solid black; display: block"
+        ></canvas>
+        <p id="signaturePadLabel2" style="display: none">Parent 2 Signature</p>
+        <canvas
+          id="signatureCanvas2"
+          style="border: 2px solid black; display: none"
+        ></canvas>
 
         <button
           style="width: 200px; height: 60px; font-size: 48px"
@@ -111,23 +82,38 @@
     <script type="module">
       let isShowingField12 = true;
 
-      let signatureCanvas;
+      const signatureCanvas1 = document.getElementById("signatureCanvas1");
+      const signatureCanvas2 = document.getElementById("signatureCanvas2");
       let pdfURL;
+
+      const resizeCanvas = () => {
+        signatureCanvas1.width = ((window.innerWidth - 16) * 2) / 3;
+        signatureCanvas1.height = signatureCanvas1.width / 3;
+
+        signatureCanvas2.width = ((window.innerWidth - 16) * 2) / 3;
+        signatureCanvas2.height = signatureCanvas2.width / 3;
+      };
+
+      window.addEventListener("resize", resizeCanvas, false);
+      resizeCanvas();
 
       function showSignaturePopup() {
         document.getElementById("signatureModal").style.display = "flex";
-        document.getElementById("signaturePadLabel").innerText =
+        document.getElementById("signaturePadLabel1").innerText =
           isShowingField12
-            ? "12A. PARENT OR OTHER INFORMANT SIGNATURE"
+            ? "12A. Parent 1 Signature"
             : "13A. ATTENDANT/CERTIFIER - SIGNATURE AND DEGREE OR TITLE";
-        // document.getElementById("signatureDivider").style.display =
-        //   isShowingField12 ? "block" : "none";
+        document.getElementById("signaturePadLabel2").style.display =
+          isShowingField12 ? "block" : "none";
+        signatureCanvas2.style.display = isShowingField12 ? "block" : "none";
 
-        signatureCanvas = document.getElementById("signatureCanvas");
-
-        const signaturePad = new SignaturePad(signatureCanvas, {
-          minWidth: 2,
-          maxWidth: 2
+        const signaturePad1 = new SignaturePad(signatureCanvas1, {
+          minWidth: 4,
+          maxWidth: 4
+        });
+        const signaturePad2 = new SignaturePad(signatureCanvas2, {
+          minWidth: 4,
+          maxWidth: 4
         });
       }
 
@@ -172,7 +158,7 @@
 
             pdf.getPage(1).then((page) => {
               console.log("Loaded page");
-              var scale = 1.5;
+              var scale = (window.innerWidth - 16) / 622;
               var viewport = page.getViewport({ scale: scale });
 
               // Prepare canvas using PDF page dimensions
@@ -200,30 +186,49 @@
       );
 
       async function saveSignaturesAndInsertIntoPDF() {
-        const signatureDataUrl = signatureCanvas.toDataURL("image/png");
+        const signatureDataUrl1 = signatureCanvas1.toDataURL("image/png");
+        const signatureDataUrl2 = signatureCanvas2.toDataURL("image/png");
 
-        const modifiedPDFBytes = await insertSignatureIntoPDF(signatureDataUrl);
+        const modifiedPDFBytes = await insertSignatureIntoPDF(
+          signatureDataUrl1,
+          signatureDataUrl2
+        );
 
         saveModifiedPDF(modifiedPDFBytes);
       }
       window.saveSignaturesAndInsertIntoPDF = saveSignaturesAndInsertIntoPDF;
 
-      async function insertSignatureIntoPDF(signatureDataUrl) {
+      async function insertSignatureIntoPDF(
+        signatureDataUrl1,
+        signatureDataUrl2
+      ) {
         await pdfBytesPromise;
         const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
         const pages = pdfDoc.getPages();
         const firstPage = pages[0];
         const pageHeight = firstPage.getHeight();
 
-        const signatureImageArray = dataURLToUint8Array(signatureDataUrl);
-        const signatureImage = await pdfDoc.embedPng(signatureImageArray);
+        const signatureImageArray1 = dataURLToUint8Array(signatureDataUrl1);
+        const signatureImage1 = await pdfDoc.embedPng(signatureImageArray1);
 
-        firstPage.drawImage(signatureImage, {
+        firstPage.drawImage(signatureImage1, {
           x: 175,
           y: pageHeight - (isShowingField12 ? 207 : 233) - 15,
           width: 45,
           height: 15
         });
+
+        if (isShowingField12) {
+          const signatureImageArray2 = dataURLToUint8Array(signatureDataUrl2);
+          const signatureImage2 = await pdfDoc.embedPng(signatureImageArray2);
+
+          firstPage.drawImage(signatureImage2, {
+            x: 275,
+            y: pageHeight - 207 - 15,
+            width: 45,
+            height: 15
+          });
+        }
 
         const modifiedPDFBytes = await pdfDoc.save();
         return modifiedPDFBytes;
