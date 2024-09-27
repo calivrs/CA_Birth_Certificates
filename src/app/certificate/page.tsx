@@ -5,7 +5,10 @@ import { pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.mjs";
+// For local development, change to ''
+const DEPLOYMENT_PREFIX = "/CA_Birth_Certificates";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `${DEPLOYMENT_PREFIX}/pdf.worker.mjs`;
 
 import { PDFDocument } from "pdf-lib";
 import { Document, Page } from "react-pdf";
@@ -14,7 +17,7 @@ import { Button } from "@mui/material";
 import { SignatureModal } from "@/components/SignatureModal";
 
 // Should just be /birth_certificate_sample.pdf for local development
-const PDF_URL = "/CA_Birth_Certificates/birth_certificate_sample.pdf";
+const PDF_URL = `${DEPLOYMENT_PREFIX}/birth_certificate_sample.pdf`;
 
 const dataURLToUint8Array = (dataURL: string) => {
   const base64 = dataURL.split(",")[1];
