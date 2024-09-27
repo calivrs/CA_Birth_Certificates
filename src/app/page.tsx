@@ -1,33 +1,5 @@
-<!DOCTYPE html>
-<html style="height: 100%">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <style>
-      @charset "UTF-8";
-      [ng\:cloak],
-      [ng-cloak],
-      [data-ng-cloak],
-      [x-ng-cloak],
-      .ng-cloak,
-      .x-ng-cloak,
-      .ng-hide:not(.ng-hide-animate) {
-        display: none !important;
-      }
-      ng\:form {
-        display: block;
-      }
-      .ng-animate-shim {
-        visibility: hidden;
-      }
-      .ng-anchor {
-        position: absolute;
-      }
-    </style>
-
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>California Electronic Birth Registration System</title>
-  </head>
-  <body style="height: 100%">
+const html = `
+  
     <div ng-app="birth" class="ng-scope">
       <!-- uiView: --><ui-view class="ng-scope"
         ><br-root
@@ -1447,5 +1419,13 @@
         height="400"
       />
     </div>
-  </body>
-</html>
+`;
+
+export default function Home() {
+  return (
+    <div
+      style={{ height: "100vh" }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
