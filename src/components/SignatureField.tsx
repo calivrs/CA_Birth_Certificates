@@ -14,12 +14,22 @@ export const SignatureField = ({
   saveButton
 }: SignatureFieldProps) => {
   const clearCanvas = () => {
-    signaturePadRef.current?.canvas.current?.getContext("2d")?.reset();
+    const canvas = signaturePadRef.current?.canvas.current;
+    if (!canvas) {
+      console.error("Could not get canvas");
+      return;
+    }
+    const context = canvas.getContext("2d");
+    if (!context) {
+      console.error("Could not get context");
+      return;
+    }
+    context.clearRect(0, 0, canvas.width, canvas.height);
   };
 
   return (
     <>
-      <p>{title}</p>
+      <h2>{title}</h2>
       <div style={{ border: "2px solid black" }}>
         <SignaturePad
           options={{

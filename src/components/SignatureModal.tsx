@@ -53,7 +53,7 @@ export const SignatureModal = ({
       <div
         style={{
           position: "absolute",
-          width: "75%",
+          width: "90%",
           backgroundColor: "white",
           borderRadius: 12,
           display: "flex",
