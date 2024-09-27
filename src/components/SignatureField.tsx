@@ -55,7 +55,7 @@ export const SignatureField = ({
             color: "white",
             textTransform: "none",
             borderRadius: 4,
-            fontSize: 24
+            fontSize: 18
           }}
           onClick={clearCanvas}
         >

@@ -39,7 +39,7 @@ export const SignatureModal = ({
           color: "white",
           textTransform: "none",
           borderRadius: 4,
-          fontSize: 24
+          fontSize: 28
         }}
         onClick={onSaveClicked}
       >
@@ -63,8 +63,8 @@ export const SignatureModal = ({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          padding: 64,
-          gap: 16,
+          padding: 32,
+          gap: 8,
           border: "none !important",
           outline: "none !important"
         }}
