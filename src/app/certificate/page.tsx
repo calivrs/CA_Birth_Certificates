@@ -33,23 +33,24 @@ const dataURLToUint8Array = (dataURL: string) => {
 export default function Certificate() {
   // Iniitally the URL of the static file, then gets changed to an object URL when we add each signature
   const [pdfURL, setPdfURL] = useState(PDF_URL);
-  const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
+
+  // 12A parent 1, then 12A parent 2, then 13A
+  const [signatureDataURLs, setSignatureDataUrls] = useState<
+    [string | null, string | null, string | null]
+  >([null, null, null] as const);
+
   const [pageWidth, setPageWidth] = useState(400);
   const [isShowingField12, setIsShowingField12] = useState(true);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+
   const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const updatePageWidth = () => {
     setPageWidth(window.innerWidth);
   };
 
-  const initializePdfBytes = () => {
-    fetch(PDF_URL).then((res) => res.arrayBuffer().then(setPdfBuffer));
-  };
-
   useEffect(() => {
     updatePageWidth();
-    initializePdfBytes();
     window.addEventListener("resize", updatePageWidth);
     return () => window.removeEventListener("resize", updatePageWidth);
   }, []);
@@ -58,45 +59,80 @@ export default function Certificate() {
     setIsPopupOpen(true);
   };
 
-  const onSave = async (
-    signatureDataUrl1: string,
-    signatureDataUrl2?: string
+  const drawSignatureOnPage = async (
+    pdfDoc: PDFDocument,
+    dataURL: string | null,
+    position: { x: number; pageHeightMinusY: number }
   ) => {
-    const pdfDoc = await PDFDocument.load(pdfBuffer!);
+    if (!dataURL) {
+      return;
+    }
+
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
     const pageHeight = firstPage.getHeight();
 
-    const signatureImageArray1 = dataURLToUint8Array(signatureDataUrl1);
-    const signatureImage1 = await pdfDoc.embedPng(signatureImageArray1);
+    const signatureImageArray = dataURLToUint8Array(dataURL);
+    const signatureImage = await pdfDoc.embedPng(signatureImageArray);
 
-    firstPage.drawImage(signatureImage1, {
-      x: 175,
-      y: pageHeight - (isShowingField12 ? 207 : 233) - 15,
+    firstPage.drawImage(signatureImage, {
+      x: position.x,
+      y: pageHeight - position.pageHeightMinusY,
       width: 45,
       height: 15
     });
+  };
 
-    if (signatureDataUrl2) {
-      const signatureImageArray2 = dataURLToUint8Array(signatureDataUrl2);
-      const signatureImage2 = await pdfDoc.embedPng(signatureImageArray2);
+  useEffect(() => {
+    const onSignatureURLsUpdated = async () => {
+      const response = await fetch(PDF_URL);
+      const pdfBuffer = await response.arrayBuffer();
 
-      firstPage.drawImage(signatureImage2, {
-        x: 275,
-        y: pageHeight - 207 - 15,
-        width: 45,
-        height: 15
+      const pdfDoc = await PDFDocument.load(pdfBuffer);
+
+      drawSignatureOnPage(pdfDoc, signatureDataURLs[0], {
+        x: 175,
+        pageHeightMinusY: 207 + 15
       });
+
+      drawSignatureOnPage(pdfDoc, signatureDataURLs[1], {
+        x: 275,
+        pageHeightMinusY: 207 + 15
+      });
+
+      drawSignatureOnPage(pdfDoc, signatureDataURLs[2], {
+        x: 175,
+        pageHeightMinusY: 233 + 15
+      });
+
+      const modifiedPDFBytes = await pdfDoc.save();
+
+      const blob = new Blob([modifiedPDFBytes], {
+        type: "application/pdf"
+      });
+      setPdfURL(URL.createObjectURL(blob));
+    };
+
+    onSignatureURLsUpdated();
+  }, [signatureDataURLs]);
+
+  const onSave = async (
+    signatureDataUrl1: string,
+    signatureDataUrl2?: string
+  ) => {
+    const newSignatureDataURLs = [...signatureDataURLs] as [
+      string | null,
+      string | null,
+      string | null
+    ];
+    if (isShowingField12) {
+      newSignatureDataURLs[0] = signatureDataUrl1;
+      newSignatureDataURLs[1] = signatureDataUrl2 ?? null;
+    } else {
+      newSignatureDataURLs[2] = signatureDataUrl1;
     }
 
-    const modifiedPDFBytes = await pdfDoc.save();
-
-    const blob = new Blob([modifiedPDFBytes], {
-      type: "application/pdf"
-    });
-    const modifiedPDFBuffer = await blob.arrayBuffer();
-    setPdfBuffer(modifiedPDFBuffer);
-    setPdfURL(URL.createObjectURL(blob));
+    setSignatureDataUrls(newSignatureDataURLs);
     setIsPopupOpen(false);
   };
 
@@ -110,9 +146,7 @@ export default function Certificate() {
     document.body.removeChild(downloadLink);
   };
 
-  return pdfBuffer === null ? (
-    "Loading..."
-  ) : (
+  return (
     <>
       <div style={{ border: "2px solid black" }}>
         <Document file={pdfURL}>
