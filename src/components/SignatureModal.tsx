@@ -39,7 +39,7 @@ export const SignatureModal = ({
           color: "white",
           textTransform: "none",
           borderRadius: 4,
-          fontSize: 28
+          fontSize: 18
         }}
         onClick={onSaveClicked}
       >
