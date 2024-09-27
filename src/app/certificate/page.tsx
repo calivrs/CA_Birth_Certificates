@@ -13,7 +13,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
 import { SignatureModal } from "@/components/SignatureModal";
 
-const PDF_URL = "/birth_certificate_sample.pdf";
+// Should just be /birth_certificate_sample.pdf for local development
+const PDF_URL = "/CA_Birth_Certificates/birth_certificate_sample.pdf";
 
 const dataURLToUint8Array = (dataURL: string) => {
   const base64 = dataURL.split(",")[1];
