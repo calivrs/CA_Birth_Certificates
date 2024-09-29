@@ -10,7 +10,7 @@ const DEPLOYMENT_PREFIX = "/CA_Birth_Certificates";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${DEPLOYMENT_PREFIX}/pdf.worker.mjs`;
 
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import { Document, Page } from "react-pdf";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
@@ -31,8 +31,10 @@ const dataURLToUint8Array = (dataURL: string) => {
 };
 
 export default function Certificate() {
-  // Iniitally the URL of the static file, then gets changed to an object URL when we add each signature
-  const [pdfURL, setPdfURL] = useState(PDF_URL);
+  // These state variables track the object URL of the PDF to display and export, respectively, as we add signatures
+  // We need separate URLs because we want to display, but not export, the yellow highlighting on the signature fields.
+  const [pdfDisplayURL, setPdfDisplayURL] = useState(PDF_URL);
+  const [pdfExportURL, setPdfExportURL] = useState(PDF_URL);
 
   // 12A parent 1, then 12A parent 2, then 13A
   const [signatureDataURLs, setSignatureDataUrls] = useState<
@@ -83,34 +85,64 @@ export default function Certificate() {
     });
   };
 
+  const drawSignaturesOnPage = async (pdfDoc: PDFDocument) => {
+    drawSignatureOnPage(pdfDoc, signatureDataURLs[0], {
+      x: 175,
+      pageHeightMinusY: 207 + 15
+    });
+
+    drawSignatureOnPage(pdfDoc, signatureDataURLs[1], {
+      x: 275,
+      pageHeightMinusY: 207 + 15
+    });
+
+    drawSignatureOnPage(pdfDoc, signatureDataURLs[2], {
+      x: 175,
+      pageHeightMinusY: 233 + 15
+    });
+
+    const modifiedPDFBytes = await pdfDoc.save();
+
+    const blob = new Blob([modifiedPDFBytes], {
+      type: "application/pdf"
+    });
+    return URL.createObjectURL(blob);
+  };
+
+  const drawHighlightBoxesOnPage = (pdfDoc: PDFDocument) => {
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+    const pageHeight = firstPage.getHeight();
+
+    firstPage.drawRectangle({
+      x: 167,
+      y: pageHeight - (209 + 15),
+      width: 247,
+      height: 16,
+      color: rgb(1, 1, 0)
+    });
+
+    firstPage.drawRectangle({
+      x: 167,
+      y: pageHeight - (233 + 15),
+      width: 247,
+      height: 16,
+      color: rgb(1, 1, 0)
+    });
+  };
+
   useEffect(() => {
     const onSignatureURLsUpdated = async () => {
       const response = await fetch(PDF_URL);
       const pdfBuffer = await response.arrayBuffer();
 
-      const pdfDoc = await PDFDocument.load(pdfBuffer);
+      const pdfDisplayDoc = await PDFDocument.load(pdfBuffer);
+      const pdfExportDoc = await PDFDocument.load(pdfBuffer);
 
-      drawSignatureOnPage(pdfDoc, signatureDataURLs[0], {
-        x: 175,
-        pageHeightMinusY: 207 + 15
-      });
+      drawHighlightBoxesOnPage(pdfDisplayDoc);
 
-      drawSignatureOnPage(pdfDoc, signatureDataURLs[1], {
-        x: 275,
-        pageHeightMinusY: 207 + 15
-      });
-
-      drawSignatureOnPage(pdfDoc, signatureDataURLs[2], {
-        x: 175,
-        pageHeightMinusY: 233 + 15
-      });
-
-      const modifiedPDFBytes = await pdfDoc.save();
-
-      const blob = new Blob([modifiedPDFBytes], {
-        type: "application/pdf"
-      });
-      setPdfURL(URL.createObjectURL(blob));
+      setPdfDisplayURL(await drawSignaturesOnPage(pdfDisplayDoc));
+      setPdfExportURL(await drawSignaturesOnPage(pdfExportDoc));
     };
 
     onSignatureURLsUpdated();
@@ -138,7 +170,7 @@ export default function Certificate() {
 
   const downloadModifiedPDF = () => {
     const downloadLink = document.createElement("a");
-    downloadLink.href = pdfURL;
+    downloadLink.href = pdfExportURL;
     downloadLink.download = "birth_certificate_sample_signed.pdf";
 
     document.body.appendChild(downloadLink);
@@ -148,8 +180,8 @@ export default function Certificate() {
 
   return (
     <>
-      <div style={{ border: "2px solid black" }}>
-        <Document file={pdfURL}>
+      <div style={{ border: "2px solid black", position: "relative" }}>
+        <Document file={pdfDisplayURL}>
           <Page
             pageNumber={1}
             canvasRef={pdfCanvasRef}
