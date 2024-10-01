@@ -33,7 +33,7 @@ const dataURLToUint8Array = (dataURL: string) => {
 export default function Certificate() {
   // These state variables track the object URL of the PDF to display and export, respectively, as we add signatures
   // We need separate URLs because we want to display, but not export, the yellow highlighting on the signature fields.
-  const [pdfDisplayURL, setPdfDisplayURL] = useState(PDF_URL);
+  const [pdfDisplayURL, setPdfDisplayURL] = useState<string | null>(null);
   const [pdfExportURL, setPdfExportURL] = useState(PDF_URL);
 
   // 12A parent 1, then 12A parent 2, then 13A
@@ -80,7 +80,7 @@ export default function Certificate() {
     firstPage.drawImage(signatureImage, {
       x: position.x,
       y: pageHeight - position.pageHeightMinusY,
-      width: 45,
+      width: 75,
       height: 15
     });
   };
