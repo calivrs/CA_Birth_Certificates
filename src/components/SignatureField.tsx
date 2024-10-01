@@ -33,8 +33,8 @@ export const SignatureField = ({
       <div style={{ border: "2px solid black" }}>
         <SignaturePad
           options={{
-            minWidth: 4,
-            maxWidth: 4
+            minWidth: 3,
+            maxWidth: 3
           }}
           canvasProps={{ style: { aspectRatio: "5 / 1" } }}
           ref={signaturePadRef}
