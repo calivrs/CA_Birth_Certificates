@@ -49,10 +49,15 @@ export const SignatureModal = ({
   };
 
   return (
-    <Modal open={isOpen} onClose={onClose}>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      style={{
+        overflowY: "scroll"
+      }}
+    >
       <div
         style={{
-          position: "absolute",
           width: "90%",
           backgroundColor: "white",
           borderRadius: 12,
@@ -60,9 +65,6 @@ export const SignatureModal = ({
           flexDirection: "column",
           overflowX: "hidden",
           overflowY: "hidden",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
           padding: 32,
           gap: 8,
           border: "none !important",
