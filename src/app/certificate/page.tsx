@@ -47,14 +47,42 @@ export default function Certificate() {
 
   const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const updatePageWidth = () => {
+  const onPageResize = () => {
     setPageWidth(window.innerWidth);
+
+    // Taken from https://github.com/arscan/pleaserotate.js/blob/master/pleaserotate.js
+    const isMobile = /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+    const rootHTML = document.querySelector("html");
+    if (rootHTML !== null) {
+      if (isMobile && window.innerHeight > window.innerWidth) {
+        // Force landscape
+        rootHTML.style.transform = "rotate(-90deg)";
+        rootHTML.style.transformOrigin = "left top";
+        rootHTML.style.width = "100vh";
+        rootHTML.style.height = "100vw";
+        rootHTML.style.overflowX = "hidden";
+        rootHTML.style.position = "absolute";
+        rootHTML.style.top = "100%";
+        rootHTML.style.left = "0";
+      } else {
+        rootHTML.style.transform = "";
+        rootHTML.style.transformOrigin = "";
+        rootHTML.style.width = "";
+        rootHTML.style.height = "";
+        rootHTML.style.overflowX = "";
+        rootHTML.style.position = "";
+        rootHTML.style.top = "";
+        rootHTML.style.left = "";
+      }
+    }
   };
 
   useEffect(() => {
-    updatePageWidth();
-    window.addEventListener("resize", updatePageWidth);
-    return () => window.removeEventListener("resize", updatePageWidth);
+    onPageResize();
+    window.addEventListener("resize", onPageResize);
+    return () => window.removeEventListener("resize", onPageResize);
   }, []);
 
   const showSignaturePopup = () => {
