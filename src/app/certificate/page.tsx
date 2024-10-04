@@ -4,6 +4,7 @@ import "core-js/actual/promise/with-resolvers";
 import { pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import PleaseRotate from "pleaserotate.js";
 
 // For local development, change to ''
