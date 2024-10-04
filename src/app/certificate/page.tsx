@@ -4,8 +4,6 @@ import "core-js/actual/promise/with-resolvers";
 import { pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import PleaseRotate from "pleaserotate.js";
 
 // For local development, change to ''
 const DEPLOYMENT_PREFIX = "/CA_Birth_Certificates";
@@ -17,6 +15,7 @@ import { Document, Page } from "react-pdf";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
 import { SignatureModal } from "@/components/SignatureModal";
+import Script from "next/script";
 
 // Should just be /birth_certificate_sample.pdf for local development
 const PDF_URL = `${DEPLOYMENT_PREFIX}/birth_certificate_sample.pdf`;
@@ -182,6 +181,10 @@ export default function Certificate() {
 
   return (
     <>
+      {
+        // eslint-disable-next-line @next/next/no-sync-scripts
+        <Script src="pleaserotate.min.js" />
+      }
       <div style={{ border: "2px solid black", position: "relative" }}>
         <Document file={pdfDisplayURL}>
           <Page
