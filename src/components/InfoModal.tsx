@@ -1,5 +1,4 @@
 import { Button } from "@mui/material";
-import { useEffect } from "react";
 
 interface InfoModalProps {
   isOpen: boolean;
@@ -7,13 +6,6 @@ interface InfoModalProps {
 }
 
 export const InfoModal = ({ isOpen, onClose }: InfoModalProps) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener("click", onClose);
-      return () => document.removeEventListener("click", onClose);
-    }
-  }, [isOpen, onClose]);
-
   return isOpen ? (
     <div
       style={{
