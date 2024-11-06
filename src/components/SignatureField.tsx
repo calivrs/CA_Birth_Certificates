@@ -36,7 +36,7 @@ export const SignatureField = ({
             minWidth: 3,
             maxWidth: 3
           }}
-          canvasProps={{ style: { aspectRatio: "5 / 1" } }}
+          canvasProps={{ style: { aspectRatio: "6 / 1" } }}
           ref={signaturePadRef}
         />
       </div>

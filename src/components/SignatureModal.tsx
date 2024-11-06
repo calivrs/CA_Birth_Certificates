@@ -5,30 +5,27 @@ import SignaturePad from "react-signature-pad-wrapper";
 
 interface SignatureModalProps {
   isOpen: boolean;
-  isShowingField12: boolean;
+  title: string;
   onClose: () => unknown;
-  onSave: (signatureDataUrl1: string, signatureDataUrl2?: string) => unknown;
+  onSave: (signatureDataUrl: string) => unknown;
 }
 
 export const SignatureModal = ({
   isOpen,
-  isShowingField12,
+  title,
   onClose,
   onSave
 }: SignatureModalProps) => {
-  const signaturePad1Ref = useRef<SignaturePad | null>(null);
-  const signaturePad2Ref = useRef<SignaturePad | null>(null);
+  const signaturePadRef = useRef<SignaturePad | null>(null);
 
   const onSaveClicked = () => {
-    const signatureDataUrl1 =
-      signaturePad1Ref.current?.canvas.current?.toDataURL("image/png");
-    const signatureDataUrl2 =
-      signaturePad2Ref.current?.canvas.current?.toDataURL("image/png");
-    if (!signatureDataUrl1) {
+    const signatureDataUrl =
+      signaturePadRef.current?.canvas.current?.toDataURL("image/png");
+    if (!signatureDataUrl) {
       console.error("Unable to get signature data URL 1");
       return;
     }
-    onSave(signatureDataUrl1, signatureDataUrl2);
+    onSave(signatureDataUrl);
   };
 
   const renderSaveButton = () => {
@@ -72,22 +69,10 @@ export const SignatureModal = ({
         }}
       >
         <SignatureField
-          title={
-            isShowingField12
-              ? "Parent 1 Signature"
-              : "13A. ATTENDANT/CERTIFIER - SIGNATURE AND DEGREE OR TITLE"
-          }
-          signaturePadRef={signaturePad1Ref}
-          saveButton={isShowingField12 ? null : renderSaveButton()}
+          title={title}
+          signaturePadRef={signaturePadRef}
+          saveButton={renderSaveButton()}
         />
-
-        {isShowingField12 ? (
-          <SignatureField
-            title="Parent 2 Signature"
-            signaturePadRef={signaturePad2Ref}
-            saveButton={renderSaveButton()}
-          />
-        ) : null}
       </div>
     </Modal>
   );

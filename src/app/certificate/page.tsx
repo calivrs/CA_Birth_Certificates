@@ -10,12 +10,14 @@ const DEPLOYMENT_PREFIX = "/CA_Birth_Certificates";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${DEPLOYMENT_PREFIX}/pdf.worker.mjs`;
 
+import moment from "moment";
 import { PDFDocument, rgb } from "pdf-lib";
 import { Document, Page } from "react-pdf";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
 import { SignatureModal } from "@/components/SignatureModal";
 import Script from "next/script";
+import { InfoModal } from "@/components/InfoModal";
 
 // Should just be /birth_certificate_sample.pdf for local development
 const PDF_URL = `${DEPLOYMENT_PREFIX}/birth_certificate_sample.pdf`;
@@ -31,20 +33,30 @@ const dataURLToUint8Array = (dataURL: string) => {
   return array;
 };
 
+const getCurrentDateString = () => {
+  return moment().format("MM/DD/YYYY HH:MM");
+};
+
+type SignatureType = "parent1" | "parent2" | "attendant";
+
 export default function Certificate() {
   // These state variables track the object URL of the PDF to display and export, respectively, as we add signatures
   // We need separate URLs because we want to display, but not export, the yellow highlighting on the signature fields.
   const [pdfDisplayURL, setPdfDisplayURL] = useState<string | null>(null);
   const [pdfExportURL, setPdfExportURL] = useState(PDF_URL);
 
-  // 12A parent 1, then 12A parent 2, then 13A
+  // Parent 1, then parent 2, then attendant
   const [signatureDataURLs, setSignatureDataUrls] = useState<
     [string | null, string | null, string | null]
   >([null, null, null] as const);
+  const [signatureDates, setSignatureDates] = useState(["", "", ""]);
 
   const [pageWidth, setPageWidth] = useState(400);
-  const [isShowingField12, setIsShowingField12] = useState(true);
+  const [currentSignature, setCurrentSignature] =
+    useState<SignatureType>("parent1");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const [infoModalOpen, setInfoModalOpen] = useState(true);
 
   const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -65,42 +77,82 @@ export default function Certificate() {
   const drawSignatureOnPage = async (
     pdfDoc: PDFDocument,
     dataURL: string | null,
-    position: { x: number; pageHeightMinusY: number }
+    position: { x: number; y: number },
+    small?: boolean
   ) => {
     if (!dataURL) {
       return;
     }
 
     const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-    const pageHeight = firstPage.getHeight();
+    const secondPage = pages[1];
 
     const signatureImageArray = dataURLToUint8Array(dataURL);
     const signatureImage = await pdfDoc.embedPng(signatureImageArray);
 
-    firstPage.drawImage(signatureImage, {
+    secondPage.drawImage(signatureImage, {
       x: position.x,
-      y: pageHeight - position.pageHeightMinusY,
-      width: 75,
-      height: 15
+      y: position.y,
+      width: small ? 90 : 150,
+      height: small ? 15 : 25
     });
   };
 
-  const drawSignaturesOnPage = async (pdfDoc: PDFDocument) => {
+  const writeDateOnPage = async (
+    pdfDoc: PDFDocument,
+    dateString: string,
+    position: { x: number; y: number }
+  ) => {
+    const pages = pdfDoc.getPages();
+    const secondPage = pages[1];
+
+    secondPage.drawText(dateString, {
+      x: position.x,
+      y: position.y,
+      size: 12
+    });
+  };
+
+  const drawSignaturesOnPage = async (
+    pdfDoc: PDFDocument,
+    secondPageOnly: boolean
+  ) => {
     drawSignatureOnPage(pdfDoc, signatureDataURLs[0], {
-      x: 175,
-      pageHeightMinusY: 207 + 15
+      x: 100,
+      y: 205
+    });
+    writeDateOnPage(pdfDoc, signatureDates[0], {
+      x: 150,
+      y: 185
     });
 
     drawSignatureOnPage(pdfDoc, signatureDataURLs[1], {
-      x: 275,
-      pageHeightMinusY: 207 + 15
+      x: 375,
+      y: 205
+    });
+    writeDateOnPage(pdfDoc, signatureDates[1], {
+      x: 425,
+      y: 185
     });
 
-    drawSignatureOnPage(pdfDoc, signatureDataURLs[2], {
-      x: 175,
-      pageHeightMinusY: 233 + 15
+    drawSignatureOnPage(
+      pdfDoc,
+      signatureDataURLs[2],
+      {
+        x: 225,
+        y: 60
+      },
+      true
+    );
+    writeDateOnPage(pdfDoc, signatureDates[2], {
+      x: 465,
+      y: 67
     });
+
+    if (secondPageOnly) {
+      pdfDoc.removePage(2);
+      pdfDoc.removePage(0);
+    }
 
     const modifiedPDFBytes = await pdfDoc.save();
 
@@ -112,22 +164,29 @@ export default function Certificate() {
 
   const drawHighlightBoxesOnPage = (pdfDoc: PDFDocument) => {
     const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-    const pageHeight = firstPage.getHeight();
+    const secondPage = pages[1];
 
-    firstPage.drawRectangle({
-      x: 167,
-      y: pageHeight - (209 + 15),
-      width: 247,
-      height: 16,
+    secondPage.drawRectangle({
+      x: 45,
+      y: 205,
+      width: 260,
+      height: 25,
       color: rgb(1, 1, 0)
     });
 
-    firstPage.drawRectangle({
-      x: 167,
-      y: pageHeight - (233 + 15),
-      width: 247,
-      height: 16,
+    secondPage.drawRectangle({
+      x: 320,
+      y: 205,
+      width: 260,
+      height: 25,
+      color: rgb(1, 1, 0)
+    });
+
+    secondPage.drawRectangle({
+      x: 180,
+      y: 62,
+      width: 200,
+      height: 15,
       color: rgb(1, 1, 0)
     });
   };
@@ -142,30 +201,38 @@ export default function Certificate() {
 
       drawHighlightBoxesOnPage(pdfDisplayDoc);
 
-      setPdfDisplayURL(await drawSignaturesOnPage(pdfDisplayDoc));
-      setPdfExportURL(await drawSignaturesOnPage(pdfExportDoc));
+      setPdfDisplayURL(await drawSignaturesOnPage(pdfDisplayDoc, false));
+      setPdfExportURL(await drawSignaturesOnPage(pdfExportDoc, true));
     };
 
     onSignatureURLsUpdated();
   }, [signatureDataURLs]);
 
-  const onSave = async (
-    signatureDataUrl1: string,
-    signatureDataUrl2?: string
-  ) => {
+  const onSave = async (signatureDataUrl: string) => {
     const newSignatureDataURLs = [...signatureDataURLs] as [
       string | null,
       string | null,
       string | null
     ];
-    if (isShowingField12) {
-      newSignatureDataURLs[0] = signatureDataUrl1;
-      newSignatureDataURLs[1] = signatureDataUrl2 ?? null;
-    } else {
-      newSignatureDataURLs[2] = signatureDataUrl1;
+    const newSignatureDates = [...signatureDates];
+    const currentDateString = getCurrentDateString();
+    switch (currentSignature) {
+      case "parent1":
+        newSignatureDataURLs[0] = signatureDataUrl;
+        newSignatureDates[0] = currentDateString;
+        break;
+      case "parent2":
+        newSignatureDataURLs[1] = signatureDataUrl;
+        newSignatureDates[1] = currentDateString;
+        break;
+      case "attendant":
+      default:
+        newSignatureDataURLs[2] = signatureDataUrl;
+        newSignatureDates[2] = currentDateString;
     }
 
     setSignatureDataUrls(newSignatureDataURLs);
+    setSignatureDates(newSignatureDates);
     setIsPopupOpen(false);
   };
 
@@ -185,30 +252,38 @@ export default function Certificate() {
         // eslint-disable-next-line @next/next/no-sync-scripts
         <Script src="pleaserotate.min.js" />
       }
-      <div style={{ border: "2px solid black", position: "relative" }}>
+      <div>
         <Document file={pdfDisplayURL}>
-          <Page
-            pageNumber={1}
-            canvasRef={pdfCanvasRef}
-            width={pageWidth - 48}
-            onClick={(e) => {
-              if (!pdfCanvasRef.current) {
-                console.error("pdfCanvasRef is unexpectedly null");
-                return;
-              }
-              const pdfRect = pdfCanvasRef.current.getBoundingClientRect();
-              const x = ((e.clientX - pdfRect.x) * 922) / pdfRect.width;
-              const y = ((e.clientY - pdfRect.y) * 1192) / pdfRect.height;
+          <div style={{ border: "2px solid black" }}>
+            <Page pageNumber={1} width={pageWidth - 48} />
+          </div>
+          <div style={{ border: "2px solid black", marginTop: 48 }}>
+            <Page
+              pageNumber={2}
+              canvasRef={pdfCanvasRef}
+              width={pageWidth - 48}
+              onClick={(e) => {
+                if (!pdfCanvasRef.current) {
+                  console.error("pdfCanvasRef is unexpectedly null");
+                  return;
+                }
+                const pdfRect = pdfCanvasRef.current.getBoundingClientRect();
+                const x = ((e.clientX - pdfRect.x) * 922) / pdfRect.width;
+                const y = ((e.clientY - pdfRect.y) * 1192) / pdfRect.height;
 
-              if (x >= 255 && x <= 620 && y >= 305 && y <= 335) {
-                setIsShowingField12(true);
-                showSignaturePopup();
-              } else if (x >= 255 && x <= 620 && y >= 340 && y <= 370) {
-                setIsShowingField12(false);
-                showSignaturePopup();
-              }
-            }}
-          />
+                if (x >= 70 && x <= 455 && y >= 845 && y <= 880) {
+                  setCurrentSignature("parent1");
+                  showSignaturePopup();
+                } else if (x >= 480 && x <= 870 && y >= 845 && y <= 880) {
+                  setCurrentSignature("parent2");
+                  showSignaturePopup();
+                } else if (x >= 270 && x <= 570 && y >= 1075 && y <= 1100) {
+                  setCurrentSignature("attendant");
+                  showSignaturePopup();
+                }
+              }}
+            />
+          </div>
         </Document>
       </div>
 
@@ -236,9 +311,20 @@ export default function Certificate() {
 
       <SignatureModal
         isOpen={isPopupOpen}
-        isShowingField12={isShowingField12}
+        title={
+          currentSignature === "parent1"
+            ? "Parent/Informant 1 Signature"
+            : currentSignature === "parent2"
+            ? "Parent/Informant 2 Signature"
+            : "Attendant/Certifier - Signature"
+        }
         onClose={() => setIsPopupOpen(false)}
         onSave={onSave}
+      />
+
+      <InfoModal
+        isOpen={infoModalOpen}
+        onClose={() => setInfoModalOpen(false)}
       />
     </>
   );
