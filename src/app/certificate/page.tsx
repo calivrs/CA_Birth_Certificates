@@ -34,7 +34,7 @@ const dataURLToUint8Array = (dataURL: string) => {
 };
 
 const getCurrentDateString = () => {
-  return moment().format("MM/DD/YYYY HH:MM");
+  return moment().format("MM/DD/YYYY HH:mm");
 };
 
 type SignatureType = "parent1" | "parent2" | "attendant";
