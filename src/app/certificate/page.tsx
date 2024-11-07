@@ -253,8 +253,11 @@ export default function Certificate() {
       }, 1500);
     }
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).PleaseRotateOptions = PleaseRotateOptions;
+
+  if (typeof window !== "undefined") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).PleaseRotateOptions = PleaseRotateOptions;
+  }
 
   return (
     <>
