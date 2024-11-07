@@ -25,7 +25,7 @@ export const InfoModal = ({ isOpen, onClose }: InfoModalProps) => {
         gap: 8,
         border: "none !important",
         outline: "none !important",
-        zIndex: 10000
+        zIndex: 500
       }}
     >
       <p>

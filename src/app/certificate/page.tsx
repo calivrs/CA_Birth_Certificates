@@ -56,7 +56,7 @@ export default function Certificate() {
     useState<SignatureType>("parent1");
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  const [infoModalOpen, setInfoModalOpen] = useState(true);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -246,6 +246,16 @@ export default function Certificate() {
     document.body.removeChild(downloadLink);
   };
 
+  const PleaseRotateOptions = {
+    onHide: () => {
+      setTimeout(() => {
+        setInfoModalOpen(true);
+      }, 1500);
+    }
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).PleaseRotateOptions = PleaseRotateOptions;
+
   return (
     <>
       {
@@ -280,6 +290,11 @@ export default function Certificate() {
                 } else if (x >= 270 && x <= 570 && y >= 1075 && y <= 1100) {
                   setCurrentSignature("attendant");
                   showSignaturePopup();
+                }
+              }}
+              onLoadSuccess={() => {
+                if (signatureDataURLs.filter(Boolean).length > 0) {
+                  window.scrollTo(0, document.body.scrollHeight);
                 }
               }}
             />
