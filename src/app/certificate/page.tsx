@@ -297,7 +297,7 @@ export default function Certificate() {
               }}
               onLoadSuccess={() => {
                 if (signatureDataURLs.filter(Boolean).length > 0) {
-                  window.scrollTo(0, document.body.scrollHeight);
+                  window.scrollTo(0, document.body.scrollHeight - 450);
                 }
               }}
             />
