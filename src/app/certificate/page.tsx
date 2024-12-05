@@ -323,7 +323,7 @@ export default function Certificate() {
           }}
           onClick={downloadModifiedPDF}
         >
-          Download
+          Upload
         </Button>
       </div>
 
