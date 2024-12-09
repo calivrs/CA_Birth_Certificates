@@ -1404,7 +1404,6 @@ export default function Home() {
   return (
     <div style={{ height: "100vh" }}>
       <div dangerouslySetInnerHTML={{ __html: html }} />
-
       <div
         style={{
           display: "flex",
