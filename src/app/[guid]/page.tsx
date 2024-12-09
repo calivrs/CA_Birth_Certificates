@@ -1,5 +1,9 @@
 import QRCode from "react-qr-code";
 
+export async function generateStaticParams() {
+  return [{ guid: "1c2d778c-8b39-4670-9f7b-a430422d90f3" }];
+}
+
 const html = `
   
     <div ng-app="birth" class="ng-scope">
