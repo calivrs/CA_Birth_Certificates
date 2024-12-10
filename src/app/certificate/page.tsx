@@ -10,6 +10,7 @@ const DEPLOYMENT_PREFIX = "/CA_Birth_Certificates";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${DEPLOYMENT_PREFIX}/pdf.worker.mjs`;
 
+import MobileDetect from "mobile-detect";
 import moment from "moment";
 import { PDFDocument, rgb } from "pdf-lib";
 import { Document, Page } from "react-pdf";
@@ -246,15 +247,17 @@ export default function Certificate() {
     document.body.removeChild(downloadLink);
   };
 
-  const PleaseRotateOptions = {
-    onHide: () => {
-      setTimeout(() => {
-        setInfoModalOpen(true);
-      }, 1500);
-    }
-  };
-
   if (typeof window !== "undefined") {
+    const mobileDetect = new MobileDetect(window.navigator.userAgent);
+    const PleaseRotateOptions = {
+      onHide: () => {
+        setTimeout(() => {
+          setInfoModalOpen(true);
+        }, 1500);
+      },
+      startOnPageLoad: !mobileDetect.tablet()
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).PleaseRotateOptions = PleaseRotateOptions;
   }
