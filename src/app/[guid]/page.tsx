@@ -1,7 +1,9 @@
-import QRCode from "react-qr-code";
+import { CertificateQRCode } from "@/components/CertificateQRCode";
+
+const DEFAULT_GUID = "1c2d778c-8b39-4670-9f7b-a430422d90f3";
 
 export async function generateStaticParams() {
-  return [{ guid: "1c2d778c-8b39-4670-9f7b-a430422d90f3" }];
+  return [{ guid: DEFAULT_GUID }];
 }
 
 const html = `
@@ -1423,8 +1425,7 @@ export default function Home() {
           Please scan the QR code with your mobile device to E-Sign the
           certificate
         </h2>
-
-        <QRCode value="https://calivrs.github.io/CA_Birth_Certificates/certificate" />
+        <CertificateQRCode guid={DEFAULT_GUID} />
       </div>
     </div>
   );
