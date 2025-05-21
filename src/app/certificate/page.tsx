@@ -305,6 +305,9 @@ export default function Certificate() {
               }}
             />
           </div>
+          <div style={{ border: "2px solid black" }}>
+            <Page pageNumber={1} width={pageWidth - 48} />
+          </div>
         </Document>
       </div>
 
@@ -336,8 +339,8 @@ export default function Certificate() {
           currentSignature === "parent1"
             ? "Parent/Informant 1 Signature"
             : currentSignature === "parent2"
-            ? "Parent/Informant 2 Signature"
-            : "Attendant/Certifier - Signature"
+              ? "Parent/Informant 2 Signature"
+              : "Attendant/Certifier - Signature"
         }
         onClose={() => setIsPopupOpen(false)}
         onSave={onSave}
