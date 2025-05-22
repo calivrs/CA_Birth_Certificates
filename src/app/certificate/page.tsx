@@ -306,7 +306,7 @@ export default function Certificate() {
             />
           </div>
           <div style={{ border: "2px solid black" }}>
-            <Page pageNumber={1} width={pageWidth - 48} />
+            <Page pageNumber={3} width={pageWidth - 48} />
           </div>
         </Document>
       </div>
